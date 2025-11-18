@@ -65,10 +65,14 @@ def run(dashboard_name: str, chart_identifier: str) -> dict[str, Any]:
             break
             
     if not chart_uuid:
-        raise ValueError(f"Chart '{chart_identifier}' not found")
+        # Fallback: If identifier looks like a UUID (36 chars), try to use it directly
+        # This handles charts that exist (e.g. dashboard-specific) but aren't in the main list
+        if len(chart_identifier) == 36:
+            chart_uuid = chart_identifier
+        else:
+            raise ValueError(f"Chart '{chart_identifier}' not found")
         
-    url = f"/api/v1/projects/{project_uuid}/saved/{chart_uuid}/results?dashboardUuid={dashboard_uuid}"
-    
+    url = f"/api/v1/saved/{chart_uuid}/results?dashboardUuid={dashboard_uuid}"    
     payload = {
         "filters": dashboard_filters
     }
