@@ -6,7 +6,7 @@ from .base_tool import ToolDefinition, ToolParameter
 from .get_project import get_project_uuid
 
 TOOL_DEFINITION = ToolDefinition(
-    name="run-metric-query",
+    name="run-raw-query",
     description="""Execute a raw metric query against a Lightdash explore.
 
 This tool allows you to run arbitrary queries by specifying dimensions, metrics, filters, and sorts directly.
@@ -20,9 +20,61 @@ It is useful for:
 - `metric_query`: The query definition (dimensions, metrics, filters, etc.).
 - `limit`: Optional row limit.
 
-**Returns:**
-- `rows`: Array of data rows.
-- `metricQuery`: The query that was executed.
+═══════════════════════════════════════════════════════════════════
+COMPLETE WORKING EXAMPLE:
+═══════════════════════════════════════════════════════════════════
+
+metric_query:
+{
+  "dimensions": ["my_table_date_day"],
+  "metrics": [],
+  "filters": {
+    "dimensions": {
+      "id": "root",
+      "and": [
+        {
+          "id": "filter_1",
+          "target": {"fieldId": "my_table_country"},
+          "operator": "equals",
+          "values": ["US"]
+        },
+        {
+          "id": "filter_2",
+          "target": {"fieldId": "my_table_date_day"},
+          "values": [30],
+          "operator": "inThePast",
+          "required": false,
+          "settings": {
+            "completed": false,
+            "unitOfTime": "days"
+          }
+        }
+      ]
+    }
+  },
+  "sorts": [{"fieldId": "my_table_date_day", "descending": true}],
+  "limit": 500,
+  "tableCalculations": [],
+  "additionalMetrics": [
+    {
+      "name": "dau",
+      "label": "Daily Active Users",
+      "description": "Count of unique users",
+      "type": "count_distinct",
+      "sql": "${TABLE}.user_id",
+      "table": "my_table",
+      "baseDimensionName": "user_id",
+      "formatOptions": {"type": "default", "separator": "default"}
+    }
+  ]
+}
+
+**Key Rules:**
+1. **Field IDs**: Use `table_field` format (e.g., `orders_amount`). Use `get-explore-schema` to find correct IDs.
+2. **Filters**:
+   - Simple: `{"operator": "equals", "values": ["value"]}`
+   - Time: `{"operator": "inThePast", "values": [7], "settings": {"unitOfTime": "days", "completed": false}}`
+3. **Additional Metrics**: Use this to create ad-hoc metrics (like count distinct) that aren't in the dbt model.
 """,
     inputSchema={
         "properties": {
@@ -32,7 +84,7 @@ It is useful for:
             ),
             "metric_query": ToolParameter(
                 type="string",
-                description="JSON string of the metric query configuration. Must include 'dimensions', 'metrics', etc."
+                description="JSON string of the metric query configuration. Must include 'dimensions', 'metrics', etc. See description for example."
             ),
             "limit": ToolParameter(
                 type="number",
@@ -44,7 +96,7 @@ It is useful for:
 )
 
 def run(explore_name: str, metric_query: str | Dict[str, Any], limit: Optional[int] = 500) -> dict[str, Any]:
-    """Run the run metric query tool"""
+    """Run the run raw query tool"""
     project_uuid = get_project_uuid()
     
     # Parse metric_query if it's a string

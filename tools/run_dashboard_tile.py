@@ -5,7 +5,7 @@ from .. import lightdash_client
 from .base_tool import ToolDefinition, ToolParameter
 from .list_dashboards import run as list_dashboards
 from .get_project import get_project_uuid
-from .run_metric_query import run as run_metric_query
+from .run_raw_query import run as run_metric_query
 
 TOOL_DEFINITION = ToolDefinition(
     name="run-dashboard-tile",
