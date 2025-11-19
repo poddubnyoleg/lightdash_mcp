@@ -2,8 +2,6 @@ from typing import Any
 
 from .. import lightdash_client
 from .base_tool import ToolDefinition, ToolParameter
-from .get_project import get_project_uuid
-from .list_charts import run as list_charts
 
 TOOL_DEFINITION = ToolDefinition(
     name="run-chart-query",
@@ -29,32 +27,23 @@ Runs the chart's configured query against the data warehouse and returns the res
 **Optional limit parameter:** Restricts the number of rows returned (useful for large datasets)""",
     inputSchema={
         "properties": {
-            "chart_identifier": ToolParameter(
+            "chart_uuid": ToolParameter(
                 type="string",
-                description="Chart name (exact match) or UUID to execute"
+                description="UUID of the chart to execute"
             ),
             "limit": ToolParameter(
                 type="number",
                 description="Optional: Limit number of rows returned. Useful for large datasets. Example: 100 will return max 100 rows"
             )
         },
-        "required": ["chart_identifier"]
+        "required": ["chart_uuid"]
     }
 )
 
-def run(chart_identifier: str, limit: int = None) -> dict[str, Any]:
+def run(chart_uuid: str, limit: int = None) -> dict[str, Any]:
     """Run the run chart query tool"""
-    project_uuid = get_project_uuid()
-    charts = list_charts()
-    
-    chart_uuid = None
-    for chart in charts:
-        if chart.get("uuid") == chart_identifier or chart.get("name", "").lower() == chart_identifier.lower():
-            chart_uuid = chart.get("uuid")
-            break
-            
-    if not chart_uuid:
-        raise ValueError(f"Chart '{chart_identifier}' not found")
+    # We no longer verify if the chart exists in the project list to save an API call.
+    # The API will return a 404 if the chart UUID is invalid.
         
     url = f"/api/v1/saved/{chart_uuid}/results"
     

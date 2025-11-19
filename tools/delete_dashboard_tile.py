@@ -68,7 +68,7 @@ def run(dashboard_name: str, tile_identifier: str) -> str:
     
     for i, tile in enumerate(tiles):
         props = tile.get("properties", {})
-        title = props.get("title", "") or props.get("chartName", "")
+        title = str(props.get("title") or props.get("chartName") or "")
         
         if tile_identifier.lower() in title.lower():
             tile_found = True
