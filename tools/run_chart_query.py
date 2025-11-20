@@ -2,6 +2,7 @@ from typing import Any
 
 from .. import lightdash_client
 from .base_tool import ToolDefinition, ToolParameter
+from .utils import flatten_rows
 
 TOOL_DEFINITION = ToolDefinition(
     name="run-chart-query",
@@ -58,4 +59,4 @@ def run(chart_uuid: str, limit: int = None) -> dict[str, Any]:
     if limit is not None and isinstance(rows, list) and len(rows) > limit:
         rows = rows[:limit]
         
-    return {"rows": rows, "row_count": len(rows)}
+    return {"rows": flatten_rows(rows), "row_count": len(rows)}

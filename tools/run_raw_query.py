@@ -4,6 +4,7 @@ import json
 from .. import lightdash_client
 from .base_tool import ToolDefinition, ToolParameter
 from .get_project import get_project_uuid
+from .utils import flatten_rows
 
 TOOL_DEFINITION = ToolDefinition(
     name="run-raw-query",
@@ -119,7 +120,7 @@ def run(explore_name: str, metric_query: str | Dict[str, Any], limit: Optional[i
     
     # Return simplified response
     return {
-        "rows": results.get("rows", []),
+        "rows": flatten_rows(results.get("rows", [])),
         "row_count": len(results.get("rows", [])),
         "fields": results.get("fields", {}) # Keep fields as they are useful for understanding the data
     }

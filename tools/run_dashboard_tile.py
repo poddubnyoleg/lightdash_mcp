@@ -6,6 +6,7 @@ from .base_tool import ToolDefinition, ToolParameter
 from .list_dashboards import run as list_dashboards
 from .get_project import get_project_uuid
 from .run_raw_query import run as run_metric_query
+from .utils import flatten_rows
 
 TOOL_DEFINITION = ToolDefinition(
     name="run-dashboard-tile",
@@ -148,7 +149,7 @@ def run(dashboard_name: str, tile_uuid: str) -> dict[str, Any]:
         response = lightdash_client.post(url, data=payload)
         results = response.get("results", {})
         return {
-            "rows": results.get("rows", []),
+            "rows": flatten_rows(results.get("rows", [])),
             "row_count": len(results.get("rows", [])),
             "fields": results.get("fields", {})
         }
