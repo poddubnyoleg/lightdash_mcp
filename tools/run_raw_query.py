@@ -1,10 +1,10 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 import json
 
 from .. import lightdash_client
 from .base_tool import ToolDefinition, ToolParameter
 from .get_project import get_project_uuid
-from .utils import flatten_rows
+from .utils import flatten_rows, format_as_csv
 
 TOOL_DEFINITION = ToolDefinition(
     name="run-raw-query",
@@ -96,7 +96,7 @@ metric_query:
     }
 )
 
-def run(explore_name: str, metric_query: str | Dict[str, Any], limit: Optional[int] = 500) -> dict[str, Any]:
+def run(explore_name: str, metric_query: Union[str, Dict[str, Any]], limit: Optional[int] = 500) -> str:
     """Run the run raw query tool"""
     project_uuid = get_project_uuid()
     
@@ -118,9 +118,10 @@ def run(explore_name: str, metric_query: str | Dict[str, Any], limit: Optional[i
     response = lightdash_client.post(url, data=query_config)
     results = response.get("results", {})
     
-    # Return simplified response
-    return {
-        "rows": flatten_rows(results.get("rows", [])),
-        "row_count": len(results.get("rows", [])),
-        "fields": results.get("fields", {}) # Keep fields as they are useful for understanding the data
+    flattened_rows = flatten_rows(results.get("rows", []))
+    metadata = {
+        "row_count": len(flattened_rows),
+        "fields": results.get("fields", {})
     }
+    
+    return format_as_csv(flattened_rows, metadata)

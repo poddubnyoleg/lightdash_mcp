@@ -2,17 +2,17 @@ from typing import Any
 
 from .. import lightdash_client
 from .base_tool import ToolDefinition, ToolParameter
-from .utils import flatten_rows
+from .utils import flatten_rows, format_as_csv
 
 TOOL_DEFINITION = ToolDefinition(
     name="run-chart-query",
-    description="""Execute a chart query and return the data results.
+    description="""Execute a chart query and return the data results in CSV format.
 
-Runs the chart's configured query against the data warehouse and returns the results.
+Runs the chart's configured query against the data warehouse and returns the results as CSV.
 
 **Returns:**
-- `rows`: Array of data rows (each row is an object with field names as keys)
-- `row_count`: Total number of rows returned
+- CSV-formatted string with headers and data rows
+- Metadata comment line with row count (format: `# Metadata: {"row_count":N}`)
 
 **When to use:** 
 - To get actual data from a chart for analysis
@@ -41,7 +41,7 @@ Runs the chart's configured query against the data warehouse and returns the res
     }
 )
 
-def run(chart_uuid: str, limit: int = None) -> dict[str, Any]:
+def run(chart_uuid: str, limit: int = None) -> str:
     """Run the run chart query tool"""
     # We no longer verify if the chart exists in the project list to save an API call.
     # The API will return a 404 if the chart UUID is invalid.
@@ -58,5 +58,8 @@ def run(chart_uuid: str, limit: int = None) -> dict[str, Any]:
     rows = query_results.get("rows", [])
     if limit is not None and isinstance(rows, list) and len(rows) > limit:
         rows = rows[:limit]
-        
-    return {"rows": flatten_rows(rows), "row_count": len(rows)}
+    
+    flattened_rows = flatten_rows(rows)
+    metadata = {"row_count": len(flattened_rows)}
+    
+    return format_as_csv(flattened_rows, metadata)
