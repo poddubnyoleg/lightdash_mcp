@@ -77,8 +77,6 @@ def execute_dashboard_tile(tile: dict[str, Any], dashboard_filters: dict[str, An
         saved_chart_uuid = props.get("savedChartUuid") or props.get("chartUuid")
         if not saved_chart_uuid:
              raise ValueError(f"Saved chart tile {tile_uuid} missing UUID")
-             
-        print(f"Executing saved chart {saved_chart_uuid}")
         
         # Execute saved chart with dashboard filters
         url = f"/api/v1/saved/{saved_chart_uuid}/results?dashboardUuid={dashboard_uuid}"    
@@ -110,7 +108,6 @@ def execute_dashboard_tile(tile: dict[str, Any], dashboard_filters: dict[str, An
              explore_name = chart_config.get("tableName")
 
         title = props.get("title", "Untitled")
-        print(f"Executing dashboard-only chart for tile '{title}'")
         
         # Merge filters
         original_filters = metric_query.get("filters", {})

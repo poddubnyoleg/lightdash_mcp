@@ -69,8 +69,6 @@ def run(dashboard_name: str, tile_uuids: Optional[List[str]] = None) -> Dict[str
                 
     if not tiles_to_run:
         return {"results": {}, "message": "No matching chart tiles found to execute."}
-        
-    print(f"Executing {len(tiles_to_run)} tiles for dashboard '{dashboard.get('name')}'...")
     
     results = {}
     
