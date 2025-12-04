@@ -113,9 +113,28 @@ def run(explore_name: str, metric_query: Union[str, Dict[str, Any]], limit: Opti
     if limit:
         query_config['limit'] = limit
 
+    # Ensure required fields are present to avoid 422 errors
+    # The API requires 'exploreName', 'sorts', and 'tableCalculations' even if empty
+    query_config['exploreName'] = explore_name
+    if 'sorts' not in query_config:
+        query_config['sorts'] = []
+    if 'tableCalculations' not in query_config:
+        query_config['tableCalculations'] = []
+    if 'dimensions' not in query_config:
+        query_config['dimensions'] = []
+    if 'metrics' not in query_config:
+        query_config['metrics'] = []
+
     url = f"/api/v1/projects/{project_uuid}/explores/{explore_name}/runQuery"
     
-    response = lightdash_client.post(url, data=query_config)
+    try:
+        response = lightdash_client.post(url, data=query_config)
+    except Exception as e:
+        error_msg = str(e)
+        if "No function has been implemented to render SQL" in error_msg and "date" in error_msg:
+            raise Exception(f"{error_msg}\n\n💡 TIP: The 'inTheYear' or similar complex date operators may not be supported for this field type. Try using explicit date range filters instead (greaterThanOrEqual and lessThanOrEqual).") from e
+        raise e
+
     results = response.get("results", {})
     
     flattened_rows = flatten_rows(results.get("rows", []))
