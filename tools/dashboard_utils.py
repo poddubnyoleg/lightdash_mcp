@@ -191,6 +191,54 @@ def execute_dashboard_tile(tile: dict[str, Any], dashboard_filters: dict[str, An
             "fields": fields
         }
 
+    elif tile_type == "sql_chart":
+        # SQL chart - uses savedSqlUuid
+        saved_sql_uuid = props.get("savedSqlUuid")
+        if not saved_sql_uuid:
+            raise ValueError(f"SQL chart tile {tile_uuid} missing savedSqlUuid")
+        
+        project_uuid = get_project_uuid()
+        url = f"/api/v2/projects/{project_uuid}/query/sql-chart"
+        
+        payload = {
+            "savedSqlUuid": saved_sql_uuid,
+            "context": "dashboardView",
+            "invalidateCache": False
+        }
+        
+        # Step 1: Execute the query (async) - returns queryUuid
+        response = lightdash_client.post(url, data=payload)
+        results = response.get("results", {})
+        query_uuid = results.get("queryUuid")
+        
+        if not query_uuid:
+            raise ValueError("No queryUuid returned from sql-chart endpoint")
+        
+        # Step 2: Fetch the actual rows using the queryUuid (with polling)
+        results_url = f"/api/v2/projects/{project_uuid}/query/{query_uuid}"
+        
+        max_attempts = 30
+        for attempt in range(max_attempts):
+            results_response = lightdash_client.get(results_url)
+            query_results = results_response.get("results", {})
+            status = query_results.get("status", "")
+            
+            if status == "ready":
+                break
+            elif status in ("error", "failed"):
+                raise ValueError(f"Query failed with status: {status}")
+            
+            # Query still running, wait and retry
+            time.sleep(0.5)
+        
+        rows = query_results.get("rows", [])
+        
+        return {
+            "rows": flatten_rows(rows),
+            "row_count": len(rows),
+            "fields": query_results.get("columns", {})
+        }
+
     elif tile_type == "chart": 
         # Dashboard-only chart
         chart_config = tile.get("properties", {})
