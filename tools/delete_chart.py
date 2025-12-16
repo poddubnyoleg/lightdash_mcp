@@ -16,7 +16,7 @@ TOOL_DEFINITION = ToolDefinition(
 **Important notes:**
 - Charts still referenced on dashboards will show as broken/missing after deletion
 - Consider checking which dashboards use this chart before deleting (use get-dashboard-tiles)
-- The Lightdash API v1 does not support updating charts, so delete + recreate is the only way to modify existing charts via API
+- For modifying existing charts, use update-chart instead of delete + recreate
 
 **Accepts:** Either chart UUID or chart name (will search for exact match)""",
     inputSchema={
