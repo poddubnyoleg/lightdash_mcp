@@ -105,6 +105,7 @@ python server.py
 | `search-charts` | Search for charts by name or description |
 | `get-chart-details` | Get complete configuration of a specific chart |
 | `create-chart` | Create a new saved chart with metric query and visualization config |
+| `update-chart` | Update an existing chart's configuration (name, description, queries, visualization) |
 | `run-chart-query` | Execute a chart's query and retrieve the data |
 | `delete-chart` | Delete a saved chart |
 
@@ -160,6 +161,7 @@ lightdash_mcp/
 │   ├── search_charts.py     # Chart search tool
 │   ├── get_chart_details.py # Chart details tool
 │   ├── create_chart.py      # Chart creation tool
+│   ├── update_chart.py      # Chart update tool
 │   ├── run_chart_query.py   # Chart query execution
 │   ├── delete_chart.py      # Chart deletion tool
 │   ├── list_dashboards.py   # Dashboard listing tool
