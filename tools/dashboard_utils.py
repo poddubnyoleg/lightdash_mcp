@@ -147,6 +147,7 @@ def execute_dashboard_tile(tile: dict[str, Any], dashboard_filters: dict[str, An
         
         payload = {
             "context": "mcp",
+            "tileUuid": tile_uuid,
             "chartUuid": saved_chart_uuid,
             "dashboardUuid": dashboard_uuid,
             "dashboardFilters": resolved_filters,

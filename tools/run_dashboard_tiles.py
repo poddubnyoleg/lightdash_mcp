@@ -62,9 +62,9 @@ def run(dashboard_name: str, tile_uuids: Optional[List[str]] = None) -> Dict[str
             if tile.get("uuid") in target_uuids:
                 tiles_to_run.append(tile)
     else:
-        # Run all chart tiles (saved_chart or chart)
+        # Run all chart tiles (saved_chart, chart, or sql_chart)
         for tile in all_tiles:
-            if tile.get("type") in ["saved_chart", "chart"]:
+            if tile.get("type") in ["saved_chart", "chart", "sql_chart"]:
                 tiles_to_run.append(tile)
                 
     if not tiles_to_run:
