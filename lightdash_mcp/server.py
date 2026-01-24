@@ -49,5 +49,11 @@ async def main():
     async with stdio_server() as (read_stream, write_stream):
         await app.run(read_stream, write_stream, app.create_initialization_options())
 
-if __name__ == "__main__":
+
+def run():
+    """Entry point for CLI."""
     asyncio.run(main())
+
+
+if __name__ == "__main__":
+    run()
