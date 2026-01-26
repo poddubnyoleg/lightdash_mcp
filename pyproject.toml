@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lightdash-mcp"
+version = "0.1.0"
+description = "Model Context Protocol (MCP) server for Lightdash analytics platform"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.0.0",
+    "requests>=2.25.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+lightdash-mcp = "lightdash_mcp.server:run"

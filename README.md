@@ -16,22 +16,33 @@ This MCP server provides a comprehensive set of tools for the full data analytic
 
 ### Prerequisites
 
-*   Python 3.8+
+*   Python 3.10+
 *   A Lightdash instance (Cloud or self-hosted)
 *   Lightdash Personal Access Token (obtain from your Lightdash profile settings)
 
-### Setup
+### Quick Start with uvx (Recommended)
 
-1.  **Clone this repository**:
-    ```bash
-    git clone <repository-url>
-    cd lightdash_mcp
-    ```
+The easiest way to use this MCP server is with `uvx`, which will automatically download and run it:
 
-2.  **Install dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
+```bash
+uvx --from git+https://github.com/<owner>/lightdash-mcp lightdash-mcp
+```
+
+### Quick Start with pipx
+
+Alternatively, you can use `pipx`:
+
+```bash
+pipx run --spec git+https://github.com/<owner>/lightdash-mcp lightdash-mcp
+```
+
+### Install from Source
+
+```bash
+git clone <repository-url>
+cd lightdash_mcp
+pip install .
+```
 
 ## Configuration
 
@@ -53,7 +64,7 @@ The server requires the following environment variables:
 3. Click **Generate new token**
 4. Copy the token (starts with `ldt_`)
 
-### Usage with Claude Desktop
+### Usage with Claude Desktop (uvx)
 
 Add the following to your `claude_desktop_config.json`:
 
@@ -61,8 +72,12 @@ Add the following to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "lightdash": {
-      "command": "python",
-      "args": ["/absolute/path/to/lightdash_mcp/server.py"],
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/<owner>/lightdash-mcp",
+        "lightdash-mcp"
+      ],
       "env": {
         "LIGHTDASH_TOKEN": "ldt_your_token_here",
         "LIGHTDASH_URL": "https://app.lightdash.cloud/api/v1"
@@ -72,7 +87,31 @@ Add the following to your `claude_desktop_config.json`:
 }
 ```
 
-> **Note**: Replace `/absolute/path/to/` with the actual absolute path to your installation.
+### Usage with Claude Desktop (pipx)
+
+If you prefer `pipx`, use this configuration:
+
+```json
+{
+  "mcpServers": {
+    "lightdash": {
+      "command": "pipx",
+      "args": [
+        "run",
+        "--spec",
+        "git+https://github.com/<owner>/lightdash-mcp",
+        "lightdash-mcp"
+      ],
+      "env": {
+        "LIGHTDASH_TOKEN": "ldt_your_token_here",
+        "LIGHTDASH_URL": "https://app.lightdash.cloud/api/v1"
+      }
+    }
+  }
+}
+```
+
+> **Note**: Replace `<owner>` with the GitHub username or organization hosting the repository.
 
 ### Usage with Other MCP Clients
 
@@ -81,7 +120,7 @@ Export the environment variables before running:
 ```bash
 export LIGHTDASH_TOKEN="ldt_your_token_here"
 export LIGHTDASH_URL="https://app.lightdash.cloud/api/v1"
-python server.py
+lightdash-mcp
 ```
 
 ## Available Tools
@@ -144,44 +183,18 @@ python server.py
 ## Project Structure
 
 ```
-lightdash_mcp/
-├── server.py                 # Main MCP server entry point
-├── lightdash_client.py       # Lightdash API client with auth
-├── requirements.txt          # Python dependencies
-├── tools/                    # Tool implementations
-│   ├── __init__.py          # Auto-discovery and tool registry
-│   ├── base_tool.py         # Base tool interface
-│   ├── utils.py             # Shared utilities
-│   ├── dashboard_utils.py   # Dashboard-specific helpers
-│   ├── list_projects.py     # Project listing tool
-│   ├── get_project.py       # Project details tool
-│   ├── list_explores.py     # Explore listing tool
-│   ├── get_explore_schema.py # Schema introspection tool
-│   ├── list_charts.py       # Chart listing tool
-│   ├── search_charts.py     # Chart search tool
-│   ├── get_chart_details.py # Chart details tool
-│   ├── create_chart.py      # Chart creation tool
-│   ├── update_chart.py      # Chart update tool
-│   ├── run_chart_query.py   # Chart query execution
-│   ├── delete_chart.py      # Chart deletion tool
-│   ├── list_dashboards.py   # Dashboard listing tool
-│   ├── create_dashboard.py  # Dashboard creation tool
-│   ├── duplicate_dashboard.py # Dashboard duplication
-│   ├── get_dashboard_tiles.py # Tile listing tool
-│   ├── get_dashboard_tile_chart_config.py # Tile config retrieval
-│   ├── get_dashboard_code.py # Dashboard config export
-│   ├── create_dashboard_tile.py # Tile creation tool
-│   ├── update_dashboard_tile.py # Tile update tool
-│   ├── rename_dashboard_tile.py # Tile rename tool
-│   ├── delete_dashboard_tile.py # Tile deletion tool
-│   ├── update_dashboard_filters.py # Dashboard filter updates
-│   ├── run_dashboard_tiles.py # Dashboard tile execution
-│   ├── run_raw_query.py     # Ad-hoc query execution
-│   ├── list_spaces.py       # Space listing tool
-│   ├── create_space.py      # Space creation tool
-│   ├── delete_space.py      # Space deletion tool
-│   └── get_custom_metrics.py # Custom metrics retrieval
-└── README.md                # This file
+.
+├── pyproject.toml              # Package configuration
+├── lightdash_mcp/              # Main package
+│   ├── __init__.py             # Package init
+│   ├── server.py               # MCP server entry point
+│   ├── lightdash_client.py     # Lightdash API client
+│   └── tools/                  # Tool implementations
+│       ├── __init__.py         # Auto-discovery and tool registry
+│       ├── base_tool.py        # Base tool interface
+│       └── *.py                # Individual tool implementations
+├── README.md
+└── LICENSE
 ```
 
 ## Development
@@ -190,7 +203,7 @@ lightdash_mcp/
 
 The server automatically discovers and registers tools from the `tools/` directory. To add a new tool:
 
-1.  **Create a new file** in `tools/` (e.g., `my_new_tool.py`)
+1.  **Create a new file** in `lightdash_mcp/tools/` (e.g., `my_new_tool.py`)
 
 2.  **Define the tool**:
     ```python
