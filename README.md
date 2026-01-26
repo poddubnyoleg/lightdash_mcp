@@ -25,7 +25,15 @@ This MCP server provides a comprehensive set of tools for the full data analytic
 The easiest way to use this MCP server is with `uvx`, which will automatically download and run it:
 
 ```bash
-uvx --from git+https://github.com/<owner>/lightdash_mcp lightdash-mcp
+uvx --from git+https://github.com/<owner>/lightdash-mcp lightdash-mcp
+```
+
+### Quick Start with pipx
+
+Alternatively, you can use `pipx`:
+
+```bash
+pipx run --spec git+https://github.com/<owner>/lightdash-mcp lightdash-mcp
 ```
 
 ### Install from Source
@@ -67,7 +75,31 @@ Add the following to your `claude_desktop_config.json`:
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/<owner>/lightdash_mcp",
+        "git+https://github.com/<owner>/lightdash-mcp",
+        "lightdash-mcp"
+      ],
+      "env": {
+        "LIGHTDASH_TOKEN": "ldt_your_token_here",
+        "LIGHTDASH_URL": "https://app.lightdash.cloud/api/v1"
+      }
+    }
+  }
+}
+```
+
+### Usage with Claude Desktop (pipx)
+
+If you prefer `pipx`, use this configuration:
+
+```json
+{
+  "mcpServers": {
+    "lightdash": {
+      "command": "pipx",
+      "args": [
+        "run",
+        "--spec",
+        "git+https://github.com/<owner>/lightdash-mcp",
         "lightdash-mcp"
       ],
       "env": {
