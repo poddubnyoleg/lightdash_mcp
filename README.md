@@ -75,7 +75,7 @@ Add the following to your `claude_desktop_config.json`:
       "command": "uvx",
       "args": [
         "--from",
-        "git+https://github.com/<owner>/lightdash-mcp",
+        "git+https://github.com/<owner>/lightdash_mcp",
         "lightdash-mcp"
       ],
       "env": {
@@ -99,7 +99,7 @@ If you prefer `pipx`, use this configuration:
       "args": [
         "run",
         "--spec",
-        "git+https://github.com/<owner>/lightdash-mcp",
+        "git+https://github.com/<owner>/lightdash_mcp",
         "lightdash-mcp"
       ],
       "env": {
