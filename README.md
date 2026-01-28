@@ -25,7 +25,7 @@ This MCP server provides a comprehensive set of tools for the full data analytic
 The easiest way to use this MCP server is with `uvx`, which will automatically download and run it:
 
 ```bash
-uvx --from git+https://github.com/<owner>/lightdash-mcp lightdash-mcp
+uvx --from git+https://github.com/<owner>/lightdash_mcp lightdash-mcp
 ```
 
 ### Quick Start with pipx
@@ -33,7 +33,7 @@ uvx --from git+https://github.com/<owner>/lightdash-mcp lightdash-mcp
 Alternatively, you can use `pipx`:
 
 ```bash
-pipx run --spec git+https://github.com/<owner>/lightdash-mcp lightdash-mcp
+pipx run --spec git+https://github.com/<owner>/lightdash_mcp lightdash-mcp
 ```
 
 ### Install from Source
@@ -53,7 +53,7 @@ The server requires the following environment variables:
 | Variable | Required | Description | Example |
 | :--- | :---: | :--- | :--- |
 | `LIGHTDASH_TOKEN` | ✅ | Your Lightdash Personal Access Token | `ldt_abc123...` |
-| `LIGHTDASH_URL` | ✅ | Base URL of your Lightdash API | `https://app.lightdash.cloud/api/v1` |
+| `LIGHTDASH_URL` | ✅ | Base URL of your Lightdash Instance | `https://app.lightdash.cloud` |
 | `CF_ACCESS_CLIENT_ID` | ❌ | Cloudflare Access Client ID (if behind CF Access) | - |
 | `CF_ACCESS_CLIENT_SECRET` | ❌ | Cloudflare Access Client Secret (if behind CF Access) | - |
 
@@ -80,7 +80,7 @@ Add the following to your `claude_desktop_config.json`:
       ],
       "env": {
         "LIGHTDASH_TOKEN": "ldt_your_token_here",
-        "LIGHTDASH_URL": "https://app.lightdash.cloud/api/v1"
+        "LIGHTDASH_URL": "https://app.lightdash.cloud"
       }
     }
   }
@@ -104,7 +104,7 @@ If you prefer `pipx`, use this configuration:
       ],
       "env": {
         "LIGHTDASH_TOKEN": "ldt_your_token_here",
-        "LIGHTDASH_URL": "https://app.lightdash.cloud/api/v1"
+        "LIGHTDASH_URL": "https://app.lightdash.cloud"
       }
     }
   }
@@ -119,7 +119,7 @@ Export the environment variables before running:
 
 ```bash
 export LIGHTDASH_TOKEN="ldt_your_token_here"
-export LIGHTDASH_URL="https://app.lightdash.cloud/api/v1"
+export LIGHTDASH_URL="https://app.lightdash.cloud"
 lightdash-mcp
 ```
 
@@ -222,7 +222,7 @@ The server automatically discovers and registers tools from the `tools/` directo
     
     def run(param1: str) -> dict:
         """Execute the tool logic"""
-        result = client.get(f"/some/endpoint/{param1}")
+        result = client.get(f"/api/v1/some/endpoint/{param1}")
         return result
     ```
 
@@ -262,9 +262,9 @@ If you see `401 Unauthorized` errors:
 ### Connection Errors
 
 If you see connection errors:
-*   Verify `LIGHTDASH_URL` is correct (should end with `/api/v1`)
-*   For Lightdash Cloud: use `https://app.lightdash.cloud/api/v1`
-*   For self-hosted: use `https://your-domain.com/api/v1`
+*   Verify `LIGHTDASH_URL` is correct
+*   For Lightdash Cloud: use `https://app.lightdash.cloud`
+*   For self-hosted: use `https://your-domain.com`
 *   If behind Cloudflare Access, ensure `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` are set
 
 ### Tool Not Found
