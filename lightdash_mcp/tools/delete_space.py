@@ -1,6 +1,7 @@
 from .. import lightdash_client
 from .base_tool import ToolDefinition, ToolParameter
 from .list_spaces import run as list_spaces
+from .get_project import get_project_uuid
 
 TOOL_DEFINITION = ToolDefinition(
     name="delete-space",
@@ -47,7 +48,8 @@ def run(space_identifier: str) -> str:
             
     if not space_uuid:
         raise ValueError(f"Space '{space_identifier}' not found")
-        
-    lightdash_client.delete(f"/api/v1/spaces/{space_uuid}")
+    
+    project_uuid = get_project_uuid()
+    lightdash_client.delete(f"/api/v1/projects/{project_uuid}/spaces/{space_uuid}")
     
     return f"Successfully deleted space '{space_name}'"
