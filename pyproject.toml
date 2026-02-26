@@ -15,5 +15,8 @@ dependencies = [
     "pydantic>=2.0.0",
 ]
 
+[project.optional-dependencies]
+iap = ["google-auth>=2.0.0"]
+
 [project.scripts]
 lightdash-mcp = "lightdash_mcp.server:run"

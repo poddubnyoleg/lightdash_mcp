@@ -44,6 +44,18 @@ cd lightdash_mcp
 pip install .
 ```
 
+### Google Cloud IAP Support
+
+If your Lightdash instance is behind [Google Cloud Identity-Aware Proxy](https://cloud.google.com/iap), install with the `iap` extra:
+
+```bash
+pip install lightdash-mcp[iap]
+# or from source
+pip install .[iap]
+```
+
+Set the `IAP_CLIENT_ID` environment variable to your IAP OAuth client ID. The server will automatically fetch OIDC tokens using [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) and attach them via the `Proxy-Authorization` header on every request.
+
 ## Configuration
 
 ### Environment Variables
@@ -56,6 +68,7 @@ The server requires the following environment variables:
 | `LIGHTDASH_URL` | ✅ | Base URL of your Lightdash Instance | `https://app.lightdash.cloud` |
 | `CF_ACCESS_CLIENT_ID` | ❌ | Cloudflare Access Client ID (if behind CF Access) | - |
 | `CF_ACCESS_CLIENT_SECRET` | ❌ | Cloudflare Access Client Secret (if behind CF Access) | - |
+| `IAP_CLIENT_ID` | ❌ | Google Cloud IAP OAuth Client ID (if behind IAP) | `123456-abc.apps.googleusercontent.com` |
 
 ### Getting Your Lightdash Token
 
@@ -266,6 +279,7 @@ If you see connection errors:
 *   For Lightdash Cloud: use `https://app.lightdash.cloud`
 *   For self-hosted: use `https://your-domain.com`
 *   If behind Cloudflare Access, ensure `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` are set
+*   If behind Google Cloud IAP, ensure `IAP_CLIENT_ID` is set and install with `pip install lightdash-mcp[iap]`
 
 ### Tool Not Found
 
