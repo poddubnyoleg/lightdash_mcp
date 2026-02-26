@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from typing import Any
 import json
 
@@ -9,7 +10,7 @@ LIGHTDASH_URL = os.getenv("LIGHTDASH_URL", "")
 LIGHTDASH_TOKEN = os.getenv("LIGHTDASH_TOKEN", "")
 CF_ACCESS_CLIENT_ID = os.getenv("CF_ACCESS_CLIENT_ID", "")
 CF_ACCESS_CLIENT_SECRET = os.getenv("CF_ACCESS_CLIENT_SECRET", "")
-IAP_CLIENT_ID = os.getenv("IAP_CLIENT_ID", "")
+IAP_ENABLED = os.getenv("IAP_ENABLED", "").lower() in ("1", "true", "yes")
 
 session = requests.Session()
 session.headers.update({
@@ -24,29 +25,60 @@ if CF_ACCESS_CLIENT_ID and CF_ACCESS_CLIENT_SECRET:
         "CF-Access-Client-Secret": CF_ACCESS_CLIENT_SECRET
     })
 
+_iap_jwt_cache: dict = {}
+
 
 def _attach_iap_token() -> None:
-    """Fetch a Google OIDC token and attach it for IAP authentication."""
+    """Sign a JWT and attach it as Proxy-Authorization for Cloud Run IAP."""
     try:
+        import google.auth
+        import google.auth.iam
+        import google.auth.jwt
         import google.auth.transport.requests
-        import google.oauth2.id_token
     except ImportError:
         raise RuntimeError(
             "google-auth is required for IAP support. "
             "Install with: pip install lightdash-mcp[iap]"
         )
+
+    now = int(time.time())
+    cached = _iap_jwt_cache.get("token")
+    if cached and _iap_jwt_cache.get("exp", 0) > now + 300:
+        session.headers["Proxy-Authorization"] = f"Bearer {cached}"
+        return
+
     try:
-        auth_req = google.auth.transport.requests.Request()
-        token = google.oauth2.id_token.fetch_id_token(auth_req, IAP_CLIENT_ID)
+        credentials, _ = google.auth.default()
+        request = google.auth.transport.requests.Request()
+        credentials.refresh(request)
+
+        sa_email = credentials.service_account_email
+        signer = google.auth.iam.Signer(request, credentials, sa_email)
+
+        exp = now + 3600
+        payload = {
+            "iss": sa_email,
+            "sub": sa_email,
+            "aud": f"{LIGHTDASH_URL}/*",
+            "iat": now,
+            "exp": exp,
+        }
+
+        token = google.auth.jwt.encode(signer, payload)
+        if isinstance(token, bytes):
+            token = token.decode("utf-8")
+
+        _iap_jwt_cache["token"] = token
+        _iap_jwt_cache["exp"] = exp
         session.headers["Proxy-Authorization"] = f"Bearer {token}"
-        print(f"[IAP] Token attached (audience={IAP_CLIENT_ID[:20]}...)", file=sys.stderr)
+        print(f"[IAP] JWT signed for {sa_email}, valid until {exp}", file=sys.stderr)
     except Exception as e:
-        print(f"[IAP] Failed to fetch token: {e}", file=sys.stderr)
+        print(f"[IAP] Failed to sign JWT: {e}", file=sys.stderr)
 
 
 def _handle_request(method: str, path: str, **kwargs) -> dict[str, Any]:
     """Make a request to the Lightdash API with error handling"""
-    if IAP_CLIENT_ID:
+    if IAP_ENABLED:
         _attach_iap_token()
     url = f"{LIGHTDASH_URL}{path}"
     try:
@@ -58,7 +90,7 @@ def _handle_request(method: str, path: str, **kwargs) -> dict[str, Any]:
             error_details = r.json()
         except Exception:
             error_details = r.text
-        
+
         raise Exception(
             f"Lightdash API Error: {e} - Details: {json.dumps(error_details) if isinstance(error_details, dict) else error_details}"
         ) from e

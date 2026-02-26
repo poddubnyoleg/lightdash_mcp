@@ -46,7 +46,7 @@ pip install .
 
 ### Google Cloud IAP Support
 
-If your Lightdash instance is behind [Google Cloud Identity-Aware Proxy](https://cloud.google.com/iap), install with the `iap` extra:
+If your Lightdash instance is behind [Google Cloud Identity-Aware Proxy](https://cloud.google.com/iap) (e.g. Cloud Run with `--iap`), install with the `iap` extra:
 
 ```bash
 pip install lightdash-mcp[iap]
@@ -54,7 +54,11 @@ pip install lightdash-mcp[iap]
 pip install .[iap]
 ```
 
-Set the `IAP_CLIENT_ID` environment variable to your IAP OAuth client ID. The server will automatically fetch OIDC tokens using [Application Default Credentials](https://cloud.google.com/docs/authentication/application-default-credentials) and attach them via the `Proxy-Authorization` header on every request.
+Set `IAP_ENABLED=true`. The server will sign a service-account JWT (audience `{LIGHTDASH_URL}/*`) via the IAM Credentials API and attach it as `Proxy-Authorization: Bearer <jwt>` on every request. The `Authorization: ApiKey` header is preserved for Lightdash.
+
+Requirements:
+- The runtime service account needs `roles/iam.serviceAccountTokenCreator` on itself
+- The runtime service account needs `roles/iap.httpsResourceAccessor` on the Cloud Run service
 
 ## Configuration
 
@@ -68,7 +72,7 @@ The server requires the following environment variables:
 | `LIGHTDASH_URL` | ✅ | Base URL of your Lightdash Instance | `https://app.lightdash.cloud` |
 | `CF_ACCESS_CLIENT_ID` | ❌ | Cloudflare Access Client ID (if behind CF Access) | - |
 | `CF_ACCESS_CLIENT_SECRET` | ❌ | Cloudflare Access Client Secret (if behind CF Access) | - |
-| `IAP_CLIENT_ID` | ❌ | Google Cloud IAP OAuth Client ID (if behind IAP) | `123456-abc.apps.googleusercontent.com` |
+| `IAP_ENABLED` | ❌ | Enable Google Cloud IAP authentication (`true`/`1`) | `true` |
 
 ### Getting Your Lightdash Token
 
@@ -279,7 +283,7 @@ If you see connection errors:
 *   For Lightdash Cloud: use `https://app.lightdash.cloud`
 *   For self-hosted: use `https://your-domain.com`
 *   If behind Cloudflare Access, ensure `CF_ACCESS_CLIENT_ID` and `CF_ACCESS_CLIENT_SECRET` are set
-*   If behind Google Cloud IAP, ensure `IAP_CLIENT_ID` is set and install with `pip install lightdash-mcp[iap]`
+*   If behind Google Cloud IAP, ensure `IAP_ENABLED=true` is set, install with `pip install lightdash-mcp[iap]`, and verify the service account has `serviceAccountTokenCreator` on itself
 
 ### Tool Not Found
 
