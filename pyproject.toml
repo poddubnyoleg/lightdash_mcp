@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "lightdash-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "Model Context Protocol (MCP) server for Lightdash analytics platform"
 readme = "README.md"
 license = "MIT"
@@ -14,6 +14,11 @@ dependencies = [
     "requests>=2.25.0",
     "pydantic>=2.0.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/poddubnyoleg/lightdash_mcp"
+Repository = "https://github.com/poddubnyoleg/lightdash_mcp"
+Issues = "https://github.com/poddubnyoleg/lightdash_mcp/issues"
 
 [project.optional-dependencies]
 iap = ["google-auth>=2.0.0"]
