@@ -3,7 +3,7 @@ from typing import Any
 
 from .. import lightdash_client
 from .base_tool import ToolDefinition, ToolParameter
-from .get_chart_details import get_chart as get_chart_details
+from .get_chart_details import get_chart as get_chart_details, _looks_like_uuid
 from .list_charts import run as list_charts
 
 TOOL_DEFINITION = ToolDefinition(
@@ -100,29 +100,26 @@ def run(
 ) -> str:
     """Run the update chart tool"""
     
-    # Find the chart
-    charts = list_charts()
-    
+    # Find the chart. A UUID may be a chart saved *within a dashboard* — absent from
+    # list-charts (Space catalog only). Resolve it directly, mirroring get-chart-details;
+    # the version endpoint (/api/v1/saved/{uuid}/version) accepts dashboard-owned charts.
     chart_uuid = None
     chart_name = ""
-    for chart in charts:
-        if chart.get("uuid") == chart_identifier:
-            chart_uuid = chart_identifier
-            chart_name = chart.get("name", "")
-            break
-    
-    if not chart_uuid:
-        for chart in charts:
+    if _looks_like_uuid(chart_identifier):
+        chart_uuid = chart_identifier
+    else:
+        for chart in list_charts():
             if chart.get("name", "").lower() == chart_identifier.lower():
                 chart_uuid = chart.get("uuid")
                 chart_name = chart.get("name", "")
                 break
-    
-    if not chart_uuid:
-        raise ValueError(f"Chart '{chart_identifier}' not found. Use list-charts to see available charts.")
-    
+        if not chart_uuid:
+            raise ValueError(f"Chart '{chart_identifier}' not found. Use list-charts to see available charts.")
+
     # Get current chart config for reference and as base for updates
     current_chart = get_chart_details(chart_uuid)
+    if not chart_name:
+        chart_name = current_chart.get("name", "")
     
     # Build version payload - start with current values
     base_metric_query = current_chart.get("metricQuery", {}).copy()
